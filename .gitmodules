@@ -1,0 +1,3 @@
+[submodule "modules/hydro"]
+	path = modules/hydro
+	url = https://github.com/GNSS-Stylist/hydro.git
