@@ -90,14 +90,18 @@
 			</return>
 			<argument index="0" name="condition" type="bool">
 			</argument>
+			<argument index="1" name="message" type="String" default="&quot;&quot;">
+			</argument>
 			<description>
-				Asserts that the [code]condition[/code] is [code]true[/code] . If the [code]condition[/code] is [code]false[/code], an error is generated and the program is halted until you resume it. Only executes in debug builds, or when running the game from the editor. Use it for debugging purposes, to make sure a statement is [code]true[/code] during development.
+				Asserts that the [code]condition[/code] is [code]true[/code]. If the [code]condition[/code] is [code]false[/code], an error is generated and the program is halted until you resume it. Only executes in debug builds, or when running the game from the editor. Use it for debugging purposes, to make sure a statement is [code]true[/code] during development.
+				The optional [code]message[/code] argument, if given, is shown in addition to the generic "Assertion failed" message. You can use this to provide additional details about why the assertion failed.
 				[codeblock]
 				# Imagine we always want speed to be between 0 and 20
 				speed = -10
 				assert(speed &lt; 20) # True, the program will continue
 				assert(speed &gt;= 0) # False, the program will stop
 				assert(speed &gt;= 0 &amp;&amp; speed &lt; 20) # You can also combine the two conditional statements in one check
+				assert(speed &lt; 20, "speed = %f, but the speed limit is 20" % speed) # Show a message with clarifying details
 				[/codeblock]
 			</description>
 		</method>
@@ -624,11 +628,11 @@
 			<argument index="0" name="path" type="String">
 			</argument>
 			<description>
-				Loads a resource from the filesystem located at [code]path[/code].
-				[b]Note:[/b] Resource paths can be obtained by right-clicking on a resource in the FileSystem dock and choosing [b]Copy Path[/b].
+				Loads a resource from the filesystem located at [code]path[/code]. The resource is loaded on the method call (unless it's referenced already elsewhere, e.g. in another script or in the scene), which might cause slight delay, especially when loading scenes. To avoid unnecessary delays when loading something multiple times, either store the resource in a variable or use [method preload].
+				[b]Note:[/b] Resource paths can be obtained by right-clicking on a resource in the FileSystem dock and choosing "Copy Path" or by dragging the file from the FileSystem dock into the script.
 				[codeblock]
-				# Load a scene called main located in the root of the project directory.
-				var main = load("res://main.tscn")
+				# Load a scene called main located in the root of the project directory and cache it in a variable.
+				var main = load("res://main.tscn") # main will contain a PackedScene resource.
 				[/codeblock]
 				[b]Important:[/b] The path must be absolute, a local path will just return [code]null[/code].
 			</description>
@@ -802,11 +806,11 @@
 			<argument index="0" name="path" type="String">
 			</argument>
 			<description>
-				Returns a resource from the filesystem that is loaded during script parsing.
-				[b]Note:[/b] Resource paths can be obtained by right clicking on a resource in the Assets Panel and choosing "Copy Path".
+				Returns a [Resource] from the filesystem located at [code]path[/code]. The resource is loaded during script parsing, i.e. is loaded with the script and [method preload] effectively acts as a reference to that resource. Note that the method requires a constant path. If you want to load a resource from a dynamic/variable path, use [method load].
+				[b]Note:[/b] Resource paths can be obtained by right clicking on a resource in the Assets Panel and choosing "Copy Path" or by dragging the file from the FileSystem dock into the script.
 				[codeblock]
-				# Load a scene called main located in the root of the project directory.
-				var main = preload("res://main.tscn")
+				# Instance a scene.
+				var diamond = preload("res://diamond.tscn").instance()
 				[/codeblock]
 			</description>
 		</method>
