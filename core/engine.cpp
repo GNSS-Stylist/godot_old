@@ -163,8 +163,10 @@ Array Engine::get_copyright_info() const {
 
 Dictionary Engine::get_donor_info() const {
 	Dictionary donors;
-	donors["platinum_sponsors"] = array_from_info(DONORS_SPONSOR_PLAT);
+	donors["platinum_sponsors"] = array_from_info(DONORS_SPONSOR_PLATINUM);
 	donors["gold_sponsors"] = array_from_info(DONORS_SPONSOR_GOLD);
+	donors["silver_sponsors"] = array_from_info(DONORS_SPONSOR_SILVER);
+	donors["bronze_sponsors"] = array_from_info(DONORS_SPONSOR_BRONZE);
 	donors["mini_sponsors"] = array_from_info(DONORS_SPONSOR_MINI);
 	donors["gold_donors"] = array_from_info(DONORS_GOLD);
 	donors["silver_donors"] = array_from_info(DONORS_SILVER);
@@ -226,10 +228,22 @@ Engine::Engine() {
 	_target_fps = 0;
 	_time_scale = 1.0;
 	_pixel_snap = false;
+	_snap_2d_transforms = false;
 	_physics_frames = 0;
 	_idle_frames = 0;
 	_in_physics = false;
 	_frame_ticks = 0;
 	_frame_step = 0;
 	editor_hint = false;
+}
+
+Engine::Singleton::Singleton(const StringName &p_name, Object *p_ptr) :
+		name(p_name),
+		ptr(p_ptr) {
+#ifdef DEBUG_ENABLED
+	Reference *ref = Object::cast_to<Reference>(p_ptr);
+	if (ref && !ref->is_referenced()) {
+		WARN_PRINT("You must use Ref<> to ensure the lifetime of a Reference object intended to be used as a singleton.");
+	}
+#endif
 }

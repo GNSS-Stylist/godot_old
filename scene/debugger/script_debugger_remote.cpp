@@ -142,6 +142,10 @@ void ScriptDebuggerRemote::debug(ScriptLanguage *p_script, bool p_can_continue, 
 
 	ERR_FAIL_COND_MSG(!tcp_client->is_connected_to_host(), "Script Debugger failed to connect, but being used anyway.");
 
+	if (allow_focus_steal_pid) {
+		OS::get_singleton()->enable_for_stealing_focus(allow_focus_steal_pid);
+	}
+
 	packet_peer_stream->put_var("debug_enter");
 	packet_peer_stream->put_var(2);
 	packet_peer_stream->put_var(p_can_continue);
@@ -382,8 +386,14 @@ void ScriptDebuggerRemote::_get_output() {
 		packet_peer_stream->put_var(output_strings.size());
 
 		while (output_strings.size()) {
+			const OutputString &output_string = output_strings.front()->get();
 
-			packet_peer_stream->put_var(output_strings.front()->get());
+			Array msg_data;
+			msg_data.push_back(output_string.message);
+			msg_data.push_back(output_string.type);
+
+			packet_peer_stream->put_var(msg_data);
+
 			output_strings.pop_front();
 		}
 		locking = false;
@@ -1157,10 +1167,15 @@ void ScriptDebuggerRemote::_print_handler(void *p_this, const String &p_string, 
 		if (overflowed)
 			s += "[...]";
 
-		sdr->output_strings.push_back(s);
+		OutputString output_string;
+		output_string.message = s;
+		output_string.type = p_error ? MESSAGE_TYPE_ERROR : MESSAGE_TYPE_LOG;
+		sdr->output_strings.push_back(output_string);
 
 		if (overflowed) {
-			sdr->output_strings.push_back("[output overflow, print less text!]");
+			output_string.message = "[output overflow, print less text!]";
+			output_string.type = MESSAGE_TYPE_ERROR;
+			sdr->output_strings.push_back(output_string);
 		}
 	}
 	sdr->mutex->unlock();
@@ -1220,6 +1235,10 @@ void ScriptDebuggerRemote::set_skip_breakpoints(bool p_skip_breakpoints) {
 	skip_breakpoints = p_skip_breakpoints;
 }
 
+void ScriptDebuggerRemote::set_allow_focus_steal_pid(OS::ProcessID p_pid) {
+	allow_focus_steal_pid = p_pid;
+}
+
 ScriptDebuggerRemote::ResourceUsageFunc ScriptDebuggerRemote::resource_usage_func = NULL;
 
 ScriptDebuggerRemote::ScriptDebuggerRemote() :
@@ -1247,6 +1266,7 @@ ScriptDebuggerRemote::ScriptDebuggerRemote() :
 		warn_count(0),
 		last_msec(0),
 		msec_count(0),
+		allow_focus_steal_pid(0),
 		locking(false),
 		poll_every(0),
 		scene_tree(NULL) {

@@ -164,7 +164,7 @@ def configure(env):
     elif env["target"] == "debug":
         env.Append(LINKFLAGS=["-O0"])
         env.Append(CCFLAGS=["-O0", "-g", "-fno-limit-debug-info"])
-        env.Append(CPPDEFINES=["_DEBUG", "DEBUG_ENABLED", "DEBUG_MEMORY_ENABLED"])
+        env.Append(CPPDEFINES=["_DEBUG", "DEBUG_ENABLED"])
         env.Append(CPPFLAGS=["-UNDEBUG"])
 
     # Compiler configuration
@@ -329,6 +329,6 @@ def get_ndk_version(path):
                 key_value = list(map(lambda x: x.strip(), line.split("=")))
                 if key_value[0] == "Pkg.Revision":
                     return key_value[1]
-    except:
+    except Exception:
         print("Could not read source prop file '%s'" % prop_file_path)
     return None

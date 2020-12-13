@@ -794,6 +794,9 @@ void SceneTreeEditor::_renamed() {
 	if (new_name == n->get_name())
 		return;
 
+	// Trim leading/trailing whitespace to prevent node names from containing accidental whitespace, which would make it more difficult to get the node via `get_node()`.
+	new_name = new_name.strip_edges();
+
 	if (!undo_redo) {
 		n->set_name(new_name);
 		which->set_metadata(0, n->get_path());
@@ -927,6 +930,10 @@ void SceneTreeEditor::_cell_collapsed(Object *p_obj) {
 Variant SceneTreeEditor::get_drag_data_fw(const Point2 &p_point, Control *p_from) {
 	if (!can_rename)
 		return Variant(); //not editable tree
+
+	if (tree->get_button_id_at_position(p_point) != -1) {
+		return Variant(); //dragging from button
+	}
 
 	Vector<Node *> selected;
 	Vector<Ref<Texture> > icons;

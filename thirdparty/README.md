@@ -1,28 +1,10 @@
 # Third party libraries
 
 
-## assimp
-
-- Upstream: http://github.com/assimp/assimp
-- Version: git (308db73d0b3c2d1870cd3e465eaa283692a4cf23, 2019)
-- License: BSD-3-Clause
-
-Files extracted from upstream source:
-
-- Run `cmake .` in root folder to generate files
-- `code/{CApi,Common,FBX,Material,PostProcessing}/`
-- `contrib/utf8cpp/source/`
-- `include/`
-- `revision.h`
-- `CREDITS` and `LICENSE` files
-- `rm -f code/Common/ZipArchiveIOSystem.cpp include/assimp/ZipArchiveIOSystem.h
-   include/assimp/irrXMLWrapper.h`
-
-
 ## bullet
 
 - Upstream: https://github.com/bulletphysics/bullet3
-- Version: 2.89
+- Version: 2.89 (2019)
 - License: zlib
 
 Files extracted from upstream source:
@@ -34,7 +16,7 @@ Files extracted from upstream source:
 ## certs
 
 - Upstream: Mozilla, via https://apps.fedoraproject.org/packages/ca-certificates
-- Version: 2018.2.26
+- Version: 2018.2.26 (2018)
 - License: MPL 2.0
 
 File extracted from a recent Fedora install:
@@ -46,7 +28,7 @@ as it's generated on the user's system.)
 ## cvtt
 
 - Upstream: https://github.com/elasota/cvtt
-- Version: 1.0.0-beta4
+- Version: 1.0.0-beta4 (2018)
 - License: MIT
 
 Files extracted from upstream source:
@@ -81,7 +63,7 @@ will limit its functionality to IPv4 only.
 ## etc2comp
 
 - Upstream: https://github.com/google/etc2comp
-- Version: git (9cd0f9c, 2017)
+- Version: git (9cd0f9cae0f32338943699bb418107db61bb66f2, 2017)
 - License: Apache 2.0
 
 Files extracted from upstream source:
@@ -99,7 +81,7 @@ comments.
 ### Noto Sans
 
 - Upstream: https://github.com/googlei18n/noto-fonts
-- Version: 1.06
+- Version: 1.06 (2017)
 - License: OFL-1.1
 
 Use UI font variant if available, because it has tight vertical metrics and good for UI.
@@ -107,7 +89,7 @@ Use UI font variant if available, because it has tight vertical metrics and good
 ### Hack Regular
 
 - Upstream: https://github.com/source-foundry/Hack
-- Version: 3.003
+- Version: 3.003 (2018)
 - License: MIT + Bitstream Vera License
 
 ### DroidSans*.ttf
@@ -120,7 +102,7 @@ Use UI font variant if available, because it has tight vertical metrics and good
 ## freetype
 
 - Upstream: https://www.freetype.org
-- Version: 2.10.2 (2020)
+- Version: 2.10.4 (2020)
 - License: FreeType License (BSD-like)
 
 Files extracted from upstream source:
@@ -133,7 +115,7 @@ Files extracted from upstream source:
 ## glad
 
 - Upstream: https://github.com/Dav1dde/glad
-- Version: 0.1.33
+- Version: 0.1.34 (2020)
 - License: MIT
 
 The files we package are automatically generated.
@@ -155,7 +137,7 @@ Files extracted from upstream source:
 ## libogg
 
 - Upstream: https://www.xiph.org/ogg
-- Version: git (c8fca6b, 2019)
+- Version: git (c8fca6b4a02d695b1ceea39b330d4406001c03ed, 2019)
 - License: BSD-3-Clause
 
 Files extracted from upstream source:
@@ -168,7 +150,7 @@ Files extracted from upstream source:
 ## libpng
 
 - Upstream: http://libpng.org/pub/png/libpng.html
-- Version: 1.6.37
+- Version: 1.6.37 (2019)
 - License: libpng/zlib
 
 Files extracted from upstream source:
@@ -183,7 +165,7 @@ Files extracted from upstream source:
 ## libsimplewebm
 
 - Upstream: https://github.com/zaps166/libsimplewebm
-- Version: git (fe57fd3, 2019)
+- Version: git (fe57fd3cfe6c0af4c6af110b1f84a90cf191d943, 2019)
 - License: MIT (main), BSD-3-Clause (libwebm)
 
 This contains libwebm, but the version in use is updated from the one used by libsimplewebm,
@@ -202,7 +184,7 @@ comments.
 ## libtheora
 
 - Upstream: https://www.theora.org
-- Version: 1.1.1
+- Version: 1.1.1 (2010)
 - License: BSD-3-Clause
 
 Files extracted from upstream source:
@@ -218,7 +200,7 @@ on top of the 1.1.1 source (not included in any stable release yet).
 ## libvorbis
 
 - Upstream: https://www.xiph.org/vorbis
-- Version: 1.3.6
+- Version: 1.3.6 (2018)
 - License: BSD-3-Clause
 
 Files extracted from upstream source:
@@ -231,7 +213,7 @@ Files extracted from upstream source:
 ## libvpx
 
 - Upstream: https://chromium.googlesource.com/webm/libvpx/
-- Version: 1.6.0
+- Version: 1.6.0 (2016)
 - License: BSD-3-Clause
 
 Files extracted from upstream source:
@@ -248,7 +230,7 @@ from the Android NDK r18.
 ## libwebp
 
 - Upstream: https://chromium.googlesource.com/webm/libwebp/
-- Version: 1.1.0
+- Version: 1.1.0 (2020)
 - License: BSD-3-Clause
 
 Files extracted from upstream source:
@@ -264,10 +246,10 @@ changes are marked with `// -- GODOT --` comments.
 ## mbedtls
 
 - Upstream: https://tls.mbed.org/
-- Version: 2.16.6
+- Version: 2.16.8 (2020)
 - License: Apache 2.0
 
-File extracted from upstream release tarball (`-apache.tgz` variant):
+File extracted from upstream release tarball:
 
 - All `*.h` from `include/mbedtls/` to `thirdparty/mbedtls/include/mbedtls/`
 - All `*.c` from `library/` to `thirdparty/mbedtls/library/`
@@ -284,7 +266,7 @@ File extracted from upstream release tarball (`-apache.tgz` variant):
 ## miniupnpc
 
 - Upstream: https://github.com/miniupnp/miniupnp/tree/master/miniupnpc
-- Version: git (4436632, 2020)
+- Version: git (44366328661826603982d1e0d7ebb4062c5f2bfc, 2020)
 - License: BSD-3-Clause
 
 Files extracted from upstream source:
@@ -300,7 +282,7 @@ The only modified file is miniupnpcstrings.h, which was created for Godot
 ## minizip
 
 - Upstream: http://www.zlib.net
-- Version: 1.2.11 (zlib contrib)
+- Version: 1.2.11 (zlib contrib, 2017)
 - License: zlib
 
 Files extracted from the upstream source:
@@ -320,7 +302,7 @@ Collection of single-file libraries used in Godot components.
 
 - `clipper.{cpp,hpp}`
   * Upstream: https://sourceforge.net/projects/polyclipping
-  * Version: 6.4.2 + Godot changes (added optional exceptions handling)
+  * Version: 6.4.2 (2017) + Godot changes (added optional exceptions handling)
   * License: BSL-1.0
 - `fastlz.{c,h}`
   * Upstream: https://github.com/ariya/FastLZ
@@ -332,7 +314,7 @@ Collection of single-file libraries used in Godot components.
   * License: Apache 2.0
 - `open-simplex-noise.{c,h}`
   * Upstream: https://github.com/smcameron/open-simplex-noise-in-c
-  * Version: git (0d555e7, 2015)
+  * Version: git (826f1dd1724e6fb3ff45f58e48c0fbae864c3403, 2020) + custom changes
   * License: Unlicense
 - `pcg.{cpp,h}`
   * Upstream: http://www.pcg-random.org
@@ -340,7 +322,7 @@ Collection of single-file libraries used in Godot components.
   * License: Apache 2.0
 - `smaz.{c,h}`
   * Upstream: https://github.com/antirez/smaz
-  * Version: git (150e125, 2009)
+  * Version: git (150e125cbae2e8fd20dd332432776ce13395d4d4, 2009)
   * License: BSD-3-Clause
   * Modifications: use `const char*` instead of `char*` for input string
 - `triangulator.{cpp,h}`
@@ -359,30 +341,29 @@ Collection of single-file libraries used in Godot components.
 
 - `ifaddrs-android.{cc,h}`
   * Upstream: https://chromium.googlesource.com/external/webrtc/stable/talk/+/master/base/ifaddrs-android.h
-  * Version: git (5976650, 2013)
+  * Version: git (5976650443d68ccfadf1dea24999ee459dd2819d, 2013)
   * License: BSD-3-Clause
 
 ### scene
 
 - `easing_equations.cpp`
   * Upstream: http://robertpenner.com/easing/ via https://github.com/jesusgollonet/ofpennereasing (modified to fit Godot types)
-  * Version: git (af72c14, 2008) + Godot types and style changes
+  * Version: git (af72c147c3a74e7e872aa28c7e2abfcced04fdce, 2008) + Godot types and style changes
   * License: BSD-3-Clause
 - `mikktspace.{c,h}`
-  * Upstream: https://wiki.blender.org/index.php/Dev:Shading/Tangent_Space_Normal_Maps
-  * Version: 1.0
+  * Upstream: https://archive.blender.org/wiki/index.php/Dev:Shading/Tangent_Space_Normal_Maps/
+  * Version: 1.0 (2011)
   * License: zlib
 - `stb_vorbis.c`
   * Upstream: https://github.com/nothings/stb
-  * Version: 1.19
+  * Version: 1.20
   * License: Public Domain (Unlicense) or MIT
-  * Modifications: `f->temp_offset += (sz+3)&~3;` changed to `f->temp_offset += (sz+7)&~7;` (needed until fixed upstream)
 
 
 ## nanosvg
 
 - Upstream: https://github.com/memononen/nanosvg
-- Version: git (25241c5, 2019)
+- Version: git (3e403ec72a9145cbbcc6c63d94a4caf079aafec2, 2020)
 - License: zlib
 
 Files extracted from the upstream source:
@@ -394,7 +375,7 @@ Files extracted from the upstream source:
 ## opus
 
 - Upstream: https://opus-codec.org
-- Version: 1.1.5 (opus) and 0.8 (opusfile)
+- Version: 1.1.5 (opus) and 0.8 (opusfile) (2017)
 - License: BSD-3-Clause
 
 Files extracted from upstream source:
@@ -411,7 +392,7 @@ Files extracted from upstream source:
 ## pcre2
 
 - Upstream: http://www.pcre.org
-- Version: 10.34
+- Version: 10.34 (2019)
 - License: BSD-3-Clause
 
 Files extracted from upstream source:
@@ -427,7 +408,7 @@ Files extracted from upstream source:
 ## pvrtccompressor
 
 - Upstream: https://bitbucket.org/jthlim/pvrtccompressor
-- Version: hg (cf71777, 2015)
+- Version: hg (cf7177748ee0dcdccfe89716dc11a47d2dc81af5, 2015)
 - License: BSD-3-Clause
 
 Files extracted from upstream source:
@@ -451,7 +432,7 @@ Files extracted from upstream source:
 ## squish
 
 - Upstream: https://sourceforge.net/projects/libsquish
-- Version: 1.15
+- Version: 1.15 (2017)
 - License: MIT
 
 Files extracted from upstream source:
@@ -466,7 +447,7 @@ comments and a patch is provided in the squish/ folder.
 ## tinyexr
 
 - Upstream: https://github.com/syoyo/tinyexr
-- Version: git (4dbd05a22f51a2d7462311569b8b0cba0bbe2ac5, 2020)
+- Version: 1.0.0 (e4b7840d9448b7d57a88384ce26143004f3c0c71, 2020)
 - License: BSD-3-Clause
 
 Files extracted from upstream source:
@@ -477,7 +458,7 @@ Files extracted from upstream source:
 ## vhacd
 
 - Upstream: https://github.com/kmammou/v-hacd
-- Version: git (b07958e, 2019)
+- Version: git (b07958e18e01d504e3af80eeaeb9f033226533d7, 2019)
 - License: BSD-3-Clause
 
 Files extracted from upstream source:
@@ -494,7 +475,7 @@ folder.
 ## wslay
 
 - Upstream: https://github.com/tatsuhiro-t/wslay
-- Version: 1.1.0
+- Version: 1.1.1 (2020)
 - License: MIT
 
 File extracted from upstream release tarball:
@@ -507,7 +488,7 @@ File extracted from upstream release tarball:
 ## xatlas
 
 - Upstream: https://github.com/jpcy/xatlas
-- Version: git (470576d3516f7e6d8b4554e7c941194a935969fd, 2020)
+- Version: git (5571fc7ef0d06832947c0a935ccdcf083f7a9264, 2020)
 - License: MIT
 
 Files extracted from upstream source:
@@ -519,7 +500,7 @@ Files extracted from upstream source:
 ## zlib
 
 - Upstream: http://www.zlib.net
-- Version: 1.2.11
+- Version: 1.2.11 (2017)
 - License: zlib
 
 Files extracted from upstream source:
@@ -530,7 +511,7 @@ Files extracted from upstream source:
 ## zstd
 
 - Upstream: https://github.com/facebook/zstd
-- Version: 1.4.4
+- Version: 1.4.5 (2020)
 - License: BSD-3-Clause
 
 Files extracted from upstream source:

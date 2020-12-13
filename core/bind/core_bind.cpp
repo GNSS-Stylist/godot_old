@@ -215,6 +215,11 @@ void _OS::set_window_title(const String &p_title) {
 	OS::get_singleton()->set_window_title(p_title);
 }
 
+void _OS::set_window_mouse_passthrough(const PoolVector2Array &p_region) {
+
+	OS::get_singleton()->set_window_mouse_passthrough(p_region);
+}
+
 int _OS::get_mouse_button_state() const {
 
 	return OS::get_singleton()->get_mouse_button_state();
@@ -318,6 +323,14 @@ Size2 _OS::get_screen_size(int p_screen) const {
 int _OS::get_screen_dpi(int p_screen) const {
 
 	return OS::get_singleton()->get_screen_dpi(p_screen);
+}
+
+float _OS::get_screen_scale(int p_screen) const {
+	return OS::get_singleton()->get_screen_scale(p_screen);
+}
+
+float _OS::get_screen_max_scale() const {
+	return OS::get_singleton()->get_screen_max_scale();
 }
 
 Point2 _OS::get_window_position() const {
@@ -1060,8 +1073,8 @@ bool _OS::has_virtual_keyboard() const {
 	return OS::get_singleton()->has_virtual_keyboard();
 }
 
-void _OS::show_virtual_keyboard(const String &p_existing_text) {
-	OS::get_singleton()->show_virtual_keyboard(p_existing_text, Rect2());
+void _OS::show_virtual_keyboard(const String &p_existing_text, bool p_multiline) {
+	OS::get_singleton()->show_virtual_keyboard(p_existing_text, Rect2(), p_multiline);
 }
 
 void _OS::hide_virtual_keyboard() {
@@ -1129,6 +1142,11 @@ void _OS::center_window() {
 void _OS::move_window_to_foreground() {
 
 	OS::get_singleton()->move_window_to_foreground();
+}
+
+int64_t _OS::get_native_handle(HandleType p_handle_type) {
+
+	return (int64_t)OS::get_singleton()->get_native_handle(p_handle_type);
 }
 
 bool _OS::is_debug_build() const {
@@ -1252,6 +1270,8 @@ void _OS::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("get_screen_position", "screen"), &_OS::get_screen_position, DEFVAL(-1));
 	ClassDB::bind_method(D_METHOD("get_screen_size", "screen"), &_OS::get_screen_size, DEFVAL(-1));
 	ClassDB::bind_method(D_METHOD("get_screen_dpi", "screen"), &_OS::get_screen_dpi, DEFVAL(-1));
+	ClassDB::bind_method(D_METHOD("get_screen_scale", "screen"), &_OS::get_screen_scale, DEFVAL(-1));
+	ClassDB::bind_method(D_METHOD("get_screen_max_scale"), &_OS::get_screen_max_scale);
 	ClassDB::bind_method(D_METHOD("get_window_position"), &_OS::get_window_position);
 	ClassDB::bind_method(D_METHOD("set_window_position", "position"), &_OS::set_window_position);
 	ClassDB::bind_method(D_METHOD("get_window_size"), &_OS::get_window_size);
@@ -1277,6 +1297,8 @@ void _OS::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("center_window"), &_OS::center_window);
 	ClassDB::bind_method(D_METHOD("move_window_to_foreground"), &_OS::move_window_to_foreground);
 
+	ClassDB::bind_method(D_METHOD("get_native_handle", "handle_type"), &_OS::get_native_handle);
+
 	ClassDB::bind_method(D_METHOD("set_borderless_window", "borderless"), &_OS::set_borderless_window);
 	ClassDB::bind_method(D_METHOD("get_borderless_window"), &_OS::get_borderless_window);
 
@@ -1297,6 +1319,7 @@ void _OS::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("has_touchscreen_ui_hint"), &_OS::has_touchscreen_ui_hint);
 
 	ClassDB::bind_method(D_METHOD("set_window_title", "title"), &_OS::set_window_title);
+	ClassDB::bind_method(D_METHOD("set_window_mouse_passthrough", "region"), &_OS::set_window_mouse_passthrough);
 
 	ClassDB::bind_method(D_METHOD("set_low_processor_usage_mode", "enable"), &_OS::set_low_processor_usage_mode);
 	ClassDB::bind_method(D_METHOD("is_in_low_processor_usage_mode"), &_OS::is_in_low_processor_usage_mode);
@@ -1362,7 +1385,7 @@ void _OS::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("dump_memory_to_file", "file"), &_OS::dump_memory_to_file);
 	ClassDB::bind_method(D_METHOD("dump_resources_to_file", "file"), &_OS::dump_resources_to_file);
 	ClassDB::bind_method(D_METHOD("has_virtual_keyboard"), &_OS::has_virtual_keyboard);
-	ClassDB::bind_method(D_METHOD("show_virtual_keyboard", "existing_text"), &_OS::show_virtual_keyboard, DEFVAL(""));
+	ClassDB::bind_method(D_METHOD("show_virtual_keyboard", "existing_text", "multiline"), &_OS::show_virtual_keyboard, DEFVAL(""), DEFVAL(false));
 	ClassDB::bind_method(D_METHOD("hide_virtual_keyboard"), &_OS::hide_virtual_keyboard);
 	ClassDB::bind_method(D_METHOD("get_virtual_keyboard_height"), &_OS::get_virtual_keyboard_height);
 	ClassDB::bind_method(D_METHOD("print_resources_in_use", "short"), &_OS::print_resources_in_use, DEFVAL(false));
@@ -1486,6 +1509,12 @@ void _OS::_bind_methods() {
 	BIND_ENUM_CONSTANT(MONTH_OCTOBER);
 	BIND_ENUM_CONSTANT(MONTH_NOVEMBER);
 	BIND_ENUM_CONSTANT(MONTH_DECEMBER);
+
+	BIND_ENUM_CONSTANT(APPLICATION_HANDLE);
+	BIND_ENUM_CONSTANT(DISPLAY_HANDLE);
+	BIND_ENUM_CONSTANT(WINDOW_HANDLE);
+	BIND_ENUM_CONSTANT(WINDOW_VIEW);
+	BIND_ENUM_CONSTANT(OPENGL_CONTEXT);
 
 	BIND_ENUM_CONSTANT(SCREEN_ORIENTATION_LANDSCAPE);
 	BIND_ENUM_CONSTANT(SCREEN_ORIENTATION_PORTRAIT);
@@ -2485,11 +2514,13 @@ Error _Directory::rename(String p_from, String p_to) {
 	ERR_FAIL_COND_V_MSG(!d, ERR_UNCONFIGURED, "Directory must be opened before use.");
 	if (!p_from.is_rel_path()) {
 		DirAccess *d = DirAccess::create_for_path(p_from);
+		ERR_FAIL_COND_V_MSG(!d->file_exists(p_from), ERR_DOES_NOT_EXIST, "File does not exist.");
 		Error err = d->rename(p_from, p_to);
 		memdelete(d);
 		return err;
 	}
 
+	ERR_FAIL_COND_V_MSG(!d->file_exists(p_from), ERR_DOES_NOT_EXIST, "File does not exist.");
 	return d->rename(p_from, p_to);
 }
 Error _Directory::remove(String p_name) {

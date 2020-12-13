@@ -184,6 +184,7 @@ void AudioDriverManager::initialize(int p_driver) {
 	GLOBAL_DEF_RST("audio/enable_audio_input", false);
 	GLOBAL_DEF_RST("audio/mix_rate", DEFAULT_MIX_RATE);
 	GLOBAL_DEF_RST("audio/output_latency", DEFAULT_OUTPUT_LATENCY);
+	GLOBAL_DEF_RST("audio/output_latency.web", 50); // Safer default output_latency for web.
 
 	int failed_driver = -1;
 
@@ -946,6 +947,7 @@ bool AudioServer::is_bus_channel_active(int p_bus, int p_channel) const {
 }
 
 void AudioServer::set_global_rate_scale(float p_scale) {
+	ERR_FAIL_COND(p_scale <= 0);
 
 	global_rate_scale = p_scale;
 }
