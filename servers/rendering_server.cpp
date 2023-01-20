@@ -535,7 +535,55 @@ Error RenderingServer::_surface_set_data(Array p_arrays, uint32_t p_format, uint
 					case ARRAY_CUSTOM_R_FLOAT:
 					case ARRAY_CUSTOM_RG_FLOAT:
 					case ARRAY_CUSTOM_RGB_FLOAT:
-					case ARRAY_CUSTOM_RGBA_FLOAT: {
+					case ARRAY_CUSTOM_RGBA_FLOAT:
+#if 1
+					{
+						ERR_FAIL_COND_V((p_arrays[ai].get_type() != Variant::PACKED_COLOR_ARRAY) && (p_arrays[ai].get_type() != Variant::PACKED_FLOAT32_ARRAY), ERR_INVALID_PARAMETER);
+
+						if (p_arrays[ai].get_type() == Variant::PACKED_COLOR_ARRAY)
+						{
+							Vector<Color> array = p_arrays[ai];
+
+							ERR_FAIL_COND_V(array.size() != p_vertex_array_len, ERR_INVALID_PARAMETER);
+
+							const Color* src = array.ptr();
+
+							for (int i = 0; i < p_vertex_array_len; i++) {
+								float rgba[4] = { (float)src[i].r, (float)src[i].g, (float)src[i].b, (float)src[i].a };
+
+								memcpy(&aw[p_offsets[ai] + i * p_attrib_stride], rgba, 4 * 4);
+							}
+						}
+						else
+						{
+							Vector<float> array = p_arrays[ai];
+							int32_t s = type - ARRAY_CUSTOM_R_FLOAT + 1;
+
+							ERR_FAIL_COND_V(array.size() != p_vertex_array_len * s, ERR_INVALID_PARAMETER);
+
+							const float* src = array.ptr();
+
+							for (int i = 0; i < p_vertex_array_len; i++) {
+								memcpy(&aw[p_offsets[ai] + i * p_attrib_stride], &src[i * s], sizeof(float) * s);
+							}
+
+						}
+					}
+
+
+
+
+
+
+
+
+
+
+
+
+
+#else
+					{
 						// RF
 						ERR_FAIL_COND_V(p_arrays[ai].get_type() != Variant::PACKED_FLOAT32_ARRAY, ERR_INVALID_PARAMETER);
 
@@ -549,7 +597,9 @@ Error RenderingServer::_surface_set_data(Array p_arrays, uint32_t p_format, uint
 						for (int i = 0; i < p_vertex_array_len; i++) {
 							memcpy(&aw[p_offsets[ai] + i * p_attrib_stride], &src[i * s], sizeof(float) * s);
 						}
-					} break;
+					}
+#endif
+					break;
 					default: {
 					}
 				}
@@ -947,9 +997,9 @@ Error RenderingServer::mesh_create_surface_data_from_arrays(SurfaceData *r_surfa
 	for (uint32_t i = 0; i < RS::ARRAY_CUSTOM_COUNT; ++i) {
 		// include custom array format type.
 		if (format & (1 << (ARRAY_CUSTOM0 + i))) {
-			format |= (RS::ARRAY_FORMAT_CUSTOM_MASK << (RS::ARRAY_FORMAT_CUSTOM_BASE + i * RS::ARRAY_FORMAT_CUSTOM_BITS)) & p_compress_format;
-		}
-	}
+					format |= (RS::ARRAY_FORMAT_CUSTOM_MASK << (RS::ARRAY_FORMAT_CUSTOM_BASE + i * RS::ARRAY_FORMAT_CUSTOM_BITS)) & p_compress_format;
+				}
+			}
 
 	uint32_t offsets[RS::ARRAY_MAX];
 

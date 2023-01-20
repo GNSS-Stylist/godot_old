@@ -93,6 +93,62 @@ Vector3 Vector3::cubic_interpolate(const Vector3 &p_b, const Vector3 &p_pre_a, c
 	return res;
 }
 
+static Vector3 hermite_interpolate_vector3(const Vector3& y0, const Vector3& y1, const Vector3& y2, const Vector3& y3,
+	const real_t x0, const real_t x1, const real_t x2, const real_t x3,
+	real_t t) {
+
+	// Everything here is based on this wikipedia article:
+	// https://en.wikipedia.org/wiki/Cubic_Hermite_spline
+
+	real_t h00 = 2.0 * pow(t, 3) - 3.0 * pow(t, 2.0) + 1.0;
+	real_t h10 = pow(t, 3.0) - 2.0 * pow(t, 2.0) + t;
+	real_t h01 = -2.0 * pow(t, 3.0) + 3.0 * pow(t, 2.0);
+	real_t h11 = pow(t, 3) - pow(t, 2.0);
+
+	Vector3 m0;
+	Vector3 m1;
+
+	m0 = 0.5 * (y2 - y0);
+	m1 = 0.5 * (y3 - y1);
+
+	// "Finite difference":
+	if (((x2 - x1) == 0.0) || ((x1 - x0) == 0.0)) {
+		m0 = Vector3();
+	}
+	else {
+		m0 = 0.5 * ((y2 - y1) / (x2 - x1) + (y1 - y0) / (x1 - x0)) * (x2 - x1);
+	}
+
+	if (((x3 - x2) == 0.0) || ((x2 - x1) == 0.0)) {
+		m1 = Vector3();
+	}
+	else {
+		m1 = 0.5 * ((y3 - y2) / (x3 - x2) + (y2 - y1) / (x2 - x1)) * (x2 - x1);
+	}
+
+	return h00 * y1 +
+		h10 * m0 +
+		h01 * y2 +
+		h11 * m1;
+}
+
+
+Vector3 Vector3::cubic_hermite_spline_interpolate(const Vector3& p_b, const Vector3& p_pre_a, const Vector3& p_post_b, const real_t t_a, const real_t t_b, const real_t t_pre_a, const real_t t_post_b, const real_t p_weight) const {
+	Vector3 p0 = p_pre_a;
+	Vector3 p1 = *this;
+	Vector3 p2 = p_b;
+	Vector3 p3 = p_post_b;
+
+	real_t t = p_weight;
+	real_t t2 = t * t;
+	real_t t3 = t2 * t;
+
+	Vector3 out;
+	out = hermite_interpolate_vector3(p_pre_a, *this, p_b, p_post_b, t_pre_a, t_a, t_b, t_post_b, t);
+	return out;
+}
+
+
 Vector3 Vector3::move_toward(const Vector3 &p_to, const real_t p_delta) const {
 	Vector3 v = *this;
 	Vector3 vd = p_to - v;

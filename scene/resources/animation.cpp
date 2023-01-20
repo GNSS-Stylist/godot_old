@@ -967,7 +967,7 @@ int Animation::find_track(const NodePath &p_path, const TrackType p_type) const 
 
 void Animation::track_set_interpolation_type(int p_track, InterpolationType p_interp) {
 	ERR_FAIL_INDEX(p_track, tracks.size());
-	ERR_FAIL_INDEX(p_interp, 3);
+	ERR_FAIL_INDEX(p_interp, INTERPOLATION_CUBIC_HERMITE_ARBITRARY_INTERVAL + 1);
 	tracks[p_track]->interpolation = p_interp;
 	emit_changed();
 }
@@ -2557,6 +2557,7 @@ T Animation::_interpolate(const Vector<TKey<T>> &p_keys, double p_time, Interpol
 		c = Math::ease(c, tr);
 	}
 
+
 	switch (p_interp) {
 		case INTERPOLATION_NEAREST: {
 			return p_keys[idx].value;
@@ -2564,7 +2565,14 @@ T Animation::_interpolate(const Vector<TKey<T>> &p_keys, double p_time, Interpol
 		case INTERPOLATION_LINEAR: {
 			return _interpolate(p_keys[idx].value, p_keys[next].value, c);
 		} break;
-		case INTERPOLATION_CUBIC: {
+		case INTERPOLATION_CUBIC:
+		case INTERPOLATION_CUBIC_HERMITE_ARBITRARY_INTERVAL: {
+
+//			int pre = (idx - 1 + len) % len;
+//			int post = (next + 1) % len;
+
+
+
 			int pre = idx - 1;
 			if (pre < 0) {
 				if (loop_mode == LOOP_LINEAR && p_loop_wrap) {
@@ -2582,7 +2590,14 @@ T Animation::_interpolate(const Vector<TKey<T>> &p_keys, double p_time, Interpol
 				}
 			}
 
-			return _cubic_interpolate(p_keys[pre].value, p_keys[idx].value, p_keys[next].value, p_keys[post].value, c);
+			if (p_interp == INTERPOLATION_CUBIC_HERMITE_ARBITRARY_INTERVAL) {
+				return _cubic_hermite_spline_interpolate(p_keys[pre].value, p_keys[idx].value, p_keys[next].value, p_keys[post].value,
+					p_keys[pre].time, p_keys[idx].time, p_keys[next].time, p_keys[post].time,
+					c);
+			}
+			else {
+				return _cubic_interpolate(p_keys[pre].value, p_keys[idx].value, p_keys[next].value, p_keys[post].value, c);
+			}
 
 		} break;
 		default:
@@ -3847,6 +3862,7 @@ void Animation::_bind_methods() {
 	BIND_ENUM_CONSTANT(INTERPOLATION_NEAREST);
 	BIND_ENUM_CONSTANT(INTERPOLATION_LINEAR);
 	BIND_ENUM_CONSTANT(INTERPOLATION_CUBIC);
+	BIND_ENUM_CONSTANT(INTERPOLATION_CUBIC_HERMITE_ARBITRARY_INTERVAL);
 
 	BIND_ENUM_CONSTANT(UPDATE_CONTINUOUS);
 	BIND_ENUM_CONSTANT(UPDATE_DISCRETE);
@@ -5344,4 +5360,152 @@ Animation::~Animation() {
 	for (int i = 0; i < tracks.size(); i++) {
 		memdelete(tracks[i]);
 	}
+}
+
+Vector3 Animation::_cubic_hermite_spline_interpolate(const Vector3& p_pre_a, const Vector3& p_a, const Vector3& p_b, const Vector3& p_post_b, const real_t p_t_pre_a, const real_t p_t_a, const real_t p_t_b, const real_t p_t_post_b, real_t p_t) const {
+	return p_a.cubic_hermite_spline_interpolate(p_b, p_pre_a, p_post_b, p_t_a, p_t_b, p_t_pre_a, p_t_post_b, p_t);
+//	return _cubic_interpolate(p_pre_a, p_a, p_b, p_post_b, p_t);
+}
+
+Quaternion Animation::_cubic_hermite_spline_interpolate(const Quaternion& p_pre_a, const Quaternion& p_a, const Quaternion& p_b, const Quaternion& p_post_b, const real_t p_t_pre_a, const real_t p_t_a, const real_t p_t_b, const real_t p_t_post_b, real_t p_t) const {
+	return p_a.cubic_hermite_spline_interpolate(p_b, p_pre_a, p_post_b, p_t_a, p_t_b, p_t_pre_a, p_t_post_b, p_t);
+//	return _cubic_interpolate(p_pre_a, p_a, p_b, p_post_b, p_t);
+}
+
+static real_t hermite_interpolate_real(const real_t y0, const real_t y1, const real_t y2, const real_t y3,
+	const real_t x0, const real_t x1, const real_t x2, const real_t x3,
+	real_t t) {
+
+	// Everything here is based on this wikipedia article:
+	// https://en.wikipedia.org/wiki/Cubic_Hermite_spline
+
+	real_t h00 = 2.0 * pow(t, 3) - 3.0 * pow(t, 2.0) + 1.0;
+	real_t h10 = pow(t, 3.0) - 2.0 * pow(t, 2.0) + t;
+	real_t h01 = -2.0 * pow(t, 3.0) + 3.0 * pow(t, 2.0);
+	real_t h11 = pow(t, 3) - pow(t, 2.0);
+
+	real_t m0;
+	real_t m1;
+
+	m0 = 0.5 * (y2 - y0);
+	m1 = 0.5 * (y3 - y1);
+
+	// "Finite difference":
+	if (((x2 - x1) == 0.0) || ((x1 - x0) == 0.0)) {
+		m0 = 0.0;
+	}
+	else {
+		m0 = 0.5 * ((y2 - y1) / (x2 - x1) + (y1 - y0) / (x1 - x0)) * (x2 - x1);
+	}
+
+	if (((x3 - x2) == 0.0) || ((x2 - x1) == 0.0)) {
+		m1 = 0.0;
+	}
+	else {
+		m1 = 0.5 * ((y3 - y2) / (x3 - x2) + (y2 - y1) / (x2 - x1)) * (x2 - x1);
+	}
+
+	return h00 * y1 +
+		h10 * m0 +
+		h01 * y2 +
+		h11 * m1;
+}
+
+
+Variant Animation::_cubic_hermite_spline_interpolate(const Variant& p_pre_a, const Variant& p_a, const Variant& p_b, const Variant& p_post_b, const real_t p_t_pre_a, const real_t p_t_a, const real_t p_t_b, const real_t p_t_post_b, real_t p_t) const {
+	Variant::Type type_a = p_a.get_type();
+	Variant::Type type_b = p_b.get_type();
+	Variant::Type type_pa = p_pre_a.get_type();
+	Variant::Type type_pb = p_post_b.get_type();
+
+	//make int and real play along
+
+	uint32_t vformat = 1 << type_a;
+	vformat |= 1 << type_b;
+	vformat |= 1 << type_pa;
+	vformat |= 1 << type_pb;
+
+	if (vformat == ((1 << Variant::INT) | (1 << Variant::FLOAT)) || vformat == (1 << Variant::FLOAT)) {
+		//mix of real and int
+
+		real_t p0 = p_pre_a;
+		real_t p1 = p_a;
+		real_t p2 = p_b;
+		real_t p3 = p_post_b;
+
+		return hermite_interpolate_real(p0, p1, p2, p3, p_t_pre_a, p_t_a, p_t_b, p_t_post_b, p_t);
+
+/*		real_t t = p_t;
+		real_t t2 = t * t;
+		real_t t3 = t2 * t;
+
+
+
+		return 0.5f *
+			((p1 * 2.0f) +
+				(-p0 + p2) * t +
+				(2.0f * p0 - 5.0f * p1 + 4 * p2 - p3) * t2 +
+				(-p0 + 3.0f * p1 - 3.0f * p2 + p3) * t3);
+*/
+
+	}
+	else if ((vformat & (vformat - 1))) {
+		return p_a; //can't interpolate, mix of types
+	}
+
+	switch (type_a) {
+	case Variant::VECTOR2: {
+		Vector2 a = p_a;
+		Vector2 b = p_b;
+		Vector2 pa = p_pre_a;
+		Vector2 pb = p_post_b;
+
+		return a.cubic_interpolate(b, pa, pb, p_t);
+	}
+	case Variant::RECT2: {
+		Rect2 a = p_a;
+		Rect2 b = p_b;
+		Rect2 pa = p_pre_a;
+		Rect2 pb = p_post_b;
+
+		return Rect2(
+			a.position.cubic_interpolate(b.position, pa.position, pb.position, p_t),
+			a.size.cubic_interpolate(b.size, pa.size, pb.size, p_t));
+	}
+	case Variant::VECTOR3: {
+		Vector3 a = p_a;
+		Vector3 b = p_b;
+		Vector3 pa = p_pre_a;
+		Vector3 pb = p_post_b;
+
+		return a.cubic_hermite_spline_interpolate(b, pa, pb, p_t_a, p_t_b, p_t_pre_a, p_t_post_b, p_t);
+//		return a.cubic_interpolate(b, pa, pb, p_t);
+	}
+	case Variant::QUATERNION: {
+		Quaternion a = p_a;
+		Quaternion b = p_b;
+		Quaternion pa = p_pre_a;
+		Quaternion pb = p_post_b;
+
+		return a.cubic_hermite_spline_interpolate(b, pa, pb, p_t_a, p_t_b, p_t_pre_a, p_t_post_b, p_t);
+//		return a.cubic_slerp(b, pa, pb, p_t);
+	}
+	case Variant::AABB: {
+		AABB a = p_a;
+		AABB b = p_b;
+		AABB pa = p_pre_a;
+		AABB pb = p_post_b;
+
+		return AABB(
+			a.position.cubic_interpolate(b.position, pa.position, pb.position, p_t),
+			a.size.cubic_interpolate(b.size, pa.size, pb.size, p_t));
+	}
+	default: {
+		return _interpolate(p_a, p_b, p_t);
+	}
+	}
+}
+
+real_t Animation::_cubic_hermite_spline_interpolate(const real_t& p_pre_a, const real_t& p_a, const real_t& p_b, const real_t& p_post_b, const real_t p_t_pre_a, const real_t p_t_a, const real_t p_t_b, const real_t p_t_post_b, real_t p_t) const {
+	return _cubic_interpolate(p_pre_a, p_a, p_b, p_post_b, p_t);
 }

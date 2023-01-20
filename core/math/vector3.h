@@ -105,6 +105,7 @@ struct _NO_DISCARD_ Vector3 {
 	_FORCE_INLINE_ Vector3 lerp(const Vector3 &p_to, const real_t p_weight) const;
 	_FORCE_INLINE_ Vector3 slerp(const Vector3 &p_to, const real_t p_weight) const;
 	Vector3 cubic_interpolate(const Vector3 &p_b, const Vector3 &p_pre_a, const Vector3 &p_post_b, const real_t p_weight) const;
+	Vector3 cubic_hermite_spline_interpolate(const Vector3& p_b, const Vector3& p_pre_a, const Vector3& p_post_b, const real_t t_a, const real_t t_b, const real_t t_pre_a, const real_t t_post_b, const real_t p_weight) const;
 	Vector3 move_toward(const Vector3 &p_to, const real_t p_delta) const;
 
 	Vector2 octahedron_encode() const;

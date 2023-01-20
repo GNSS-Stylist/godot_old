@@ -59,6 +59,7 @@ struct _NO_DISCARD_ Quaternion {
 	void normalize();
 	Quaternion normalized() const;
 	bool is_normalized() const;
+	Quaternion conjugate() const;
 	Quaternion inverse() const;
 	Quaternion log() const;
 	Quaternion exp() const;
@@ -71,10 +72,15 @@ struct _NO_DISCARD_ Quaternion {
 
 	Quaternion slerp(const Quaternion &p_to, const real_t &p_weight) const;
 	Quaternion slerpni(const Quaternion &p_to, const real_t &p_weight) const;
+	Quaternion lerp(const Quaternion& p_to, const real_t& p_weight) const;
+	Quaternion lerpni(const Quaternion& p_to, const real_t& p_weight) const;
 	Quaternion cubic_slerp(const Quaternion &p_b, const Quaternion &p_pre_a, const Quaternion &p_post_b, const real_t &p_weight) const;
+	Quaternion cubic_hermite_spline_interpolate(const Quaternion& p_b, const Quaternion& p_pre_a, const Quaternion& p_post_b,
+		const real_t t_a, const real_t t_b, const real_t t_pre_a, const real_t t_post_b,
+		const real_t& p_t) const;
 
 	Vector3 get_axis() const;
-	float get_angle() const;
+	real_t get_angle() const;
 
 	_FORCE_INLINE_ void get_axis_angle(Vector3 &r_axis, real_t &r_angle) const {
 		r_angle = 2 * Math::acos(w);
@@ -86,6 +92,13 @@ struct _NO_DISCARD_ Quaternion {
 
 	void operator*=(const Quaternion &p_q);
 	Quaternion operator*(const Quaternion &p_q) const;
+
+	Quaternion operator*(const Vector3& v) const {
+		return Quaternion(w * v.x + y * v.z - z * v.y,
+			w * v.y + z * v.x - x * v.z,
+			w * v.z + x * v.y - y * v.x,
+			-x * v.x - y * v.y - z * v.z);
+	}
 
 	_FORCE_INLINE_ Vector3 xform(const Vector3 &v) const {
 #ifdef MATH_CHECKS
@@ -135,11 +148,12 @@ struct _NO_DISCARD_ Quaternion {
 			w(p_q.w) {
 	}
 
-	void operator=(const Quaternion &p_q) {
+	Quaternion& operator=(const Quaternion& p_q) {
 		x = p_q.x;
 		y = p_q.y;
 		z = p_q.z;
 		w = p_q.w;
+		return *this;
 	}
 
 	Quaternion(const Vector3 &v0, const Vector3 &v1) // shortest arc
@@ -162,6 +176,22 @@ struct _NO_DISCARD_ Quaternion {
 			w = s * 0.5f;
 		}
 	}
+	private:
+		static Quaternion static_conjugate(const Quaternion& quat);
+		static Quaternion static_inverse(const Quaternion& quat);
+		static Quaternion static_log(const Quaternion& quat);
+		static Quaternion static_exp(const Quaternion& quat);
+		static Quaternion static_squad(const Quaternion& q1, const Quaternion& a, const Quaternion& b, const Quaternion& c, const real_t t);
+		static Quaternion static_cubic_slerp(const Quaternion& q0, const Quaternion& q1, const Quaternion& q2, const Quaternion& q3, const real_t& p_weight);
+		Quaternion static_cubic_hermite_spline_interpolate(const Quaternion& q0, const Quaternion& q1, const Quaternion& q2, const Quaternion& q3,
+			const real_t t0, const real_t t1, const real_t t2, const real_t t3,
+			const real_t& p_t) const;
+		static Quaternion static_slerp(const Quaternion& p_from, const Quaternion& p_to, const real_t& p_weight);
+		static Quaternion static_lerpni(const Quaternion& p_from, const Quaternion& p_to, const real_t& p_weight);
+		static Quaternion static_lerp(const Quaternion& p_from, const Quaternion& p_to, const real_t& p_weight);
+		static Quaternion static_slerpni(const Quaternion& p_from, const Quaternion& p_to, const real_t& p_weight);
+
+		Vector3 vector_part() const;
 };
 
 real_t Quaternion::dot(const Quaternion &p_q) const {
